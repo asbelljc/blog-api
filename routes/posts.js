@@ -7,24 +7,26 @@ const comment_controller = require('../controllers/commentController');
 
 // Posts routes
 
-router.get('/', post_controller.get_posts);
+router.get('/', post_controller.get_all);
+
+router.get('/:id', post_controller.get_one);
 
 router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
-  post_controller.create_post
+  post_controller.create_one
 );
 
 router.put(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  post_controller.update_post
+  post_controller.update_one
 );
 
 router.delete(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  post_controller.delete_post
+  post_controller.delete_one
 );
 
 // Comments sub-routes
