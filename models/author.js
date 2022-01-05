@@ -22,6 +22,4 @@ AuthorSchema.methods.isValidPassword = async function (password) {
   return isMatch;
 };
 
-const AuthorModel = mongoose.model('Author', AuthorSchema);
-
-module.exports = AuthorModel;
+module.exports = mongoose.model('Author', AuthorSchema);

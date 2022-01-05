@@ -4,8 +4,8 @@ const { DateTime } = require('luxon');
 
 const PostSchema = new Schema({
   title: { type: String, required: true },
-  date_time: { type: Date, default: Date.now() },
   body: { type: String, required: true },
+  date_time: { type: Date, default: Date.now() },
   published: { type: Boolean, default: false },
 });
 
