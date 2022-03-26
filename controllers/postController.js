@@ -27,22 +27,36 @@ exports.get_one = async function (req, res, next) {
   }
 };
 
-exports.create_one = async function (req, res, next) {
-  const { title, body, date_time, isPublished } = req.body;
-  const newPost = new Post({
-    title,
-    body,
-    date_time,
-    isPublished,
-  });
+exports.create_one = [
+  body('title').not().isEmpty().trim().escape(),
+  body('body').not().isEmpty().trim().escape(),
 
-  try {
-    await newPost.save();
-    return res.status(201).json({ newRecord });
-  } catch (err) {
-    next(err);
-  }
-};
+  async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({
+        data: req.body,
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    const { title, body, date_time, isPublished } = req.body;
+    const newPost = new Post({
+      title,
+      body,
+      date_time,
+      isPublished,
+    });
+
+    try {
+      await newPost.save();
+      return res.status(201).json({ newPost });
+    } catch (err) {
+      next(err);
+    }
+  },
+];
 
 exports.update_one = async function (req, res, next) {
   try {
@@ -59,7 +73,7 @@ exports.update_one = async function (req, res, next) {
         .status(404)
         .json({ err: `Post (id: ${req.params.id}) not found.` });
     }
-    return res.status(201).json({ post });
+    return res.status(200).json({ post });
   } catch (err) {
     next(err);
   }
@@ -74,7 +88,7 @@ exports.delete_one = async function (req, res, next) {
         .json({ err: `Post (id: ${req.params.id}) not found.` });
     }
     return res
-      .status(204)
+      .status(200)
       .json({ message: `Post (id: ${req.params.id} successfully deleted.)` });
   } catch (err) {
     next(err);
