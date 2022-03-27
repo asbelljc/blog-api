@@ -58,26 +58,39 @@ exports.create_one = [
   },
 ];
 
-exports.update_one = async function (req, res, next) {
-  try {
-    const { title, body, date_time, isPublished } = req.body;
+exports.update_one = [
+  body('title').not().isEmpty().trim().escape(),
+  body('body').not().isEmpty().trim().escape(),
 
-    const post = await Post.findByIdAndUpdate(req.params.id, {
-      title,
-      body,
-      date_time,
-      isPublished,
-    });
-    if (!post) {
-      return res
-        .status(404)
-        .json({ err: `Post (id: ${req.params.id}) not found.` });
+  async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({
+        data: req.body,
+        errors: errors.array(),
+      });
+      return;
     }
-    return res.status(200).json({ post });
-  } catch (err) {
-    next(err);
-  }
-};
+
+    const { title, body, date_time, isPublished } = req.body;
+    try {
+      const post = await Post.findByIdAndUpdate(req.params.id, {
+        title,
+        body,
+        date_time,
+        isPublished,
+      });
+      if (!post) {
+        return res
+          .status(404)
+          .json({ err: `Post (id: ${req.params.id}) not found.` });
+      }
+      return res.status(200).json({ post });
+    } catch (err) {
+      next(err);
+    }
+  },
+];
 
 exports.delete_one = async function (req, res, next) {
   try {
