@@ -3,7 +3,8 @@ const router = express.Router();
 const passport = require('passport');
 
 const post_controller = require('../controllers/postController');
-const comment_controller = require('../controllers/commentController');
+
+const commentsRouter = require('./comments');
 
 // Posts routes
 
@@ -29,22 +30,8 @@ router.delete(
   post_controller.delete_one
 );
 
-// Comments sub-routes
+// Comments sub-routes get funneled into commentsRouter
 
-router.get('/:id/comments', comment_controller.get_comments);
-
-router.post('/:id/comments', comment_controller.create_comment);
-
-router.put(
-  '/:id/comments/:commentid',
-  passport.authenticate('jwt', { session: false }),
-  comment_controller.update_comment
-);
-
-router.delete(
-  '/:id/comments/:commentid',
-  passport.authenticate('jwt', { session: false }),
-  comment_controller.delete_comment
-);
+router.use('/:id/comments', commentsRouter);
 
 module.exports = router;
