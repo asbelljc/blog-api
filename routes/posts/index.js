@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
-const post_controller = require('../controllers/postController');
+const post_controller = require('../../controllers/postController');
 
 const commentsRouter = require('./comments');
 
 // Posts routes
-
 router.get('/', post_controller.get_all);
 
 router.get('/:id', post_controller.get_one);
@@ -31,7 +30,6 @@ router.delete(
 );
 
 // Comments sub-routes get funneled into commentsRouter
-
 router.use('/:id/comments', commentsRouter);
 
 module.exports = router;

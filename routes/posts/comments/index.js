@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true }); // mergeParams lets us access params from parent route (need post_id)
 const passport = require('passport');
 
-const comment_controller = require('../controllers/commentController');
+const comment_controller = require('../../../controllers/commentController');
 
 router.get('/', comment_controller.get_all_relevant);
 
