@@ -20,6 +20,7 @@ const CommentSchema = new Schema({
     validate: [validateEmail, 'Please give a valid email address.'],
   },
   date_time: { type: Date, default: Date.now() },
+  post_id: { type: String, required: true },
 });
 
 CommentSchema.virtual('name').get(function () {
