@@ -73,6 +73,7 @@ exports.update_one = [
     }
 
     const { title, body, date_time, isPublished } = req.body;
+
     try {
       const post = await Post.findByIdAndUpdate(req.params.id, {
         title,
