@@ -9,7 +9,7 @@ exports.signup = [
     .escape()
     .custom(async function (username) {
       try {
-        const existingUsername = await Author.findOnd({ username: username });
+        const existingUsername = await Author.findOne({ username: username });
         if (existingUsername) {
           throw new Error('Username is taken.');
         }
@@ -23,16 +23,17 @@ exports.signup = [
 
   async function (req, res, next) {
     const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        username: req.body.username,
+        errors: errors.array(),
+      });
+    }
+
     passport.authenticate(
       'signup',
       { session: false },
       function (err, user, info) {
-        if (!errors.isEmpty()) {
-          return res.json({
-            username: req.body.username,
-            errors: errors.array(),
-          });
-        }
         if (err) {
           return next(err);
         }
