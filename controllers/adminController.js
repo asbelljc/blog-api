@@ -59,16 +59,16 @@ exports.login = async function (req, res, next) {
       res.status(401).json({ success: false, msg: 'Could not find user.' });
     }
 
-    const isValidPassword = user.isValidPassword(req.body.password);
+    const isValidPassword = await user.isValidPassword(req.body.password);
 
     if (isValidPassword) {
-      const tokenObject = user.issueJwt();
+      const jwt = user.issueJwt();
 
       res.status(200).json({
         success: true,
         user: user,
-        token: tokenObject.token,
-        expiresIn: tokenObject.expires,
+        token: jwt.token,
+        expiresIn: jwt.expires,
       });
     } else {
       res.status(401).json({ success: false, msg: 'Password is incorrect.' });
@@ -81,11 +81,13 @@ exports.login = async function (req, res, next) {
 // TEST PROTECTED ROUTE
 exports.get_protected = [
   passport.authenticate('jwt', { session: false }),
+
   function (req, res, next) {
     res.status(200).json({ success: true, msg: 'You are authorized!' });
   },
 ];
 
+// Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MjQ4YzcxMDQyYWIxMGEzMDFkZDBiZWIiLCJpYXQiOjE2NDg5NjA4Njk4MTMsImV4cCI6MTY0ODk2MjA3OTQxM30.e1o0RF7XppGtc8qn2vQpfLDQJo2ZFCCDSgAp704D0Aw
 // exports.signup = [
 //   body('username')
 //     .trim()
