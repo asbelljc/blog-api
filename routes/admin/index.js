@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const adminController = require('../../controllers/adminController');
+const userController = require('../../controllers/userController');
 
-router.post('/signup', adminController.signup);
+router.post('/signup', userController.signup);
 
-router.post('/login', adminController.login);
+router.post('/login', userController.login);
 
-router.get('/protected', adminController.get_protected);
+router.get('/protected', userController.get_protected);
+
+router.get('/admin', userController.get_admin);
 
 module.exports = router;

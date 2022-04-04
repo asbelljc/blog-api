@@ -2,21 +2,41 @@ require('dotenv').config();
 
 // Useful middlewares
 const express = require('express');
+// const mongoose = require('mongoose');
+const connection = require('./config/database');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
 const passport = require('passport');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 
 // Configure passport
-require('./config/auth')(passport);
+require('./config/auth');
 
-// Router
-const router = require('./routes/index');
+// Create and configure session store
+const sessionStore = new MongoStore({
+  mongooseConnection: connection,
+  collection: 'sessions',
+});
+
+const sessionOptions = {
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store: sessionStore,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 14, // 2-week sessions
+  },
+};
+
+// Get router
+const router = require('./routes');
 
 const app = express();
 
-require('./config/database'); // configure db and open connection
+app.use(session(sessionOptions));
 app.use(passport.initialize()); // initialize passport on every request
 app.use(helmet());
 app.use(logger('dev'));
