@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const User = require('../models/user');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
-exports.isAuth = function (req, res, next) {
+const isAuth = function (req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
@@ -10,7 +12,7 @@ exports.isAuth = function (req, res, next) {
   }
 };
 
-exports.isAdmin = function (req, res, next) {
+const isAdmin = function (req, res, next) {
   if (req.isAuthenticated() && req.user.admin) {
     next();
   } else {
@@ -50,7 +52,7 @@ exports.signup = [
       await new User({
         username: req.body.username,
         password: req.body.password,
-        admin: req.body.admin,
+        admin: req.body.admin && req.body.admin == process.env.ADMIN_PASSWORD,
       }).save();
 
       res.status(201).json({ msg: 'You have successfully registered.' });
@@ -59,6 +61,18 @@ exports.signup = [
     }
   },
 ];
+
+exports.login = [
+  passport.authenticate('local'),
+  function (req, res, next) {
+    res.status(200).json({ msg: 'You have successfully logged in.' });
+  },
+];
+
+exports.logout = function (req, res, next) {
+  req.logout();
+  res.status(200).json({ msg: 'You have successfully logged out.' });
+};
 
 exports.get_protected = [
   isAuth,

@@ -10,7 +10,7 @@ const verify = async (username, password, done) => {
       return done(null, false);
     }
 
-    const isValidPassword = user.isValidPassword(password);
+    const isValidPassword = await user.isValidPassword(password);
 
     if (isValidPassword) {
       return done(null, user);
