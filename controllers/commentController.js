@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 exports.get_all_relevant = async function (req, res, next) {
   try {
     const postId = req.params.id;
-    const comments = await Comment.find({ post_id: postId }).sort({
+    const comments = await Comment.find({ post: postId }).sort({
       date_time: -1,
     });
     if (!comments) {
