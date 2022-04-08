@@ -17,9 +17,8 @@ exports.get_all_relevant = async function (req, res, next) {
 };
 
 exports.create_one = [
-  body('body').not().isEmpty().trim().escape(),
-  body('first_name').not().isEmpty().trim().escape(),
-  body('last_name').not().isEmpty().trim().escape(),
+  body('body').not().isEmpty({ ignore_whitespace: true }).escape(),
+  body('username').isAlphanumeric(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -31,16 +30,14 @@ exports.create_one = [
       return;
     }
 
-    const { body, first_name, last_name, email, date_time } = req.body;
-    const post_id = req.params.id;
+    const { body, username, date_time } = req.body;
+    const post = req.params.id;
 
     const newComment = new Comment({
       body,
-      first_name,
-      last_name,
-      email,
+      username,
       date_time,
-      post_id,
+      post,
     });
 
     try {
@@ -53,9 +50,8 @@ exports.create_one = [
 ];
 
 exports.update_one = [
-  body('body').not().isEmpty().trim().escape(),
-  body('first_name').not().isEmpty().trim().escape(),
-  body('last_name').not().isEmpty().trim().escape(),
+  body('body').not().isEmpty({ ignore_whitespace: true }).escape(),
+  body('username').isAlphanumeric(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -67,17 +63,15 @@ exports.update_one = [
       return;
     }
 
-    const { body, first_name, last_name, email, date_time } = req.body;
-    const post_id = req.params.id;
+    const { body, username, date_time } = req.body;
+    const post = req.params.id;
 
     try {
       const comment = await Comment.findByIdAndUpdate(req.params.commentid, {
         body,
-        first_name,
-        last_name,
-        email,
+        username,
         date_time,
-        post_id,
+        post,
       });
       if (!comment) {
         return res
