@@ -4,7 +4,7 @@ const User = require('../models/user');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
-const isAuth = function (req, res, next) {
+exports.isAuth = function (req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
@@ -12,7 +12,7 @@ const isAuth = function (req, res, next) {
   }
 };
 
-const isAdmin = function (req, res, next) {
+exports.isAdmin = function (req, res, next) {
   if (req.isAuthenticated() && req.user.admin) {
     next();
   } else {
@@ -74,16 +74,18 @@ exports.logout = function (req, res, next) {
   res.status(200).json({ msg: 'You have successfully logged out.' });
 };
 
-exports.get_protected = [
-  isAuth,
-  function (req, res, next) {
-    res.send('You made it to the protected route.');
-  },
-];
+// BOTH TESTED SUCCESSFULLY; now will use isAuth and isAdmin middlewares elsewhere
+//
+// exports.get_protected = [
+//   isAuth,
+//   function (req, res, next) {
+//     res.send('You made it to the protected route.');
+//   },
+// ];
 
-exports.get_admin = [
-  isAdmin,
-  function (req, res, next) {
-    res.send('You made it to the admin route.');
-  },
-];
+// exports.get_admin = [
+//   isAdmin,
+//   function (req, res, next) {
+//     res.send('You made it to the admin route.');
+//   },
+// ];
