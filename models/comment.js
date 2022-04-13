@@ -4,7 +4,7 @@ const { DateTime } = require('luxon');
 
 const CommentSchema = new Schema({
   body: { type: String, required: true },
-  username: { type: String, required: true }, // does this need to reference user?
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // does this need to reference user? I think so at this time, for verifying edit/delete permissions...
   date_time: { type: Date, default: Date.now() },
   post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
 });

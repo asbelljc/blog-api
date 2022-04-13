@@ -30,12 +30,13 @@ exports.create_one = [
       return;
     }
 
-    const { body, username, date_time } = req.body;
+    const { body, date_time } = req.body;
     const post = req.params.id;
+    const user = req.user._id;
 
     const newComment = new Comment({
       body,
-      username,
+      user,
       date_time,
       post,
     });
@@ -63,21 +64,34 @@ exports.update_one = [
       return;
     }
 
-    const { body, username, date_time } = req.body;
+    const { body, date_time } = req.body;
     const post = req.params.id;
+    const user = req.user;
 
     try {
-      const comment = await Comment.findByIdAndUpdate(req.params.commentid, {
-        body,
-        username,
-        date_time,
-        post,
-      });
+      const comment = await Comment.findById(req.params.commentid).populate(
+        'user'
+      ); // Must populate user field to compare against user object stored in request by passport
+
       if (!comment) {
         return res
           .status(404)
           .json({ err: `Comment (id: ${req.params.commentid}) not found.` });
       }
+
+      if (comment.user !== req.user) {
+        return res
+          .status(403)
+          .json({ err: 'You do not have permission to edit this comment.' });
+      }
+
+      await Comment.findByIdAndUpdate(req.params.commentId, {
+        body,
+        user,
+        date_time,
+        post,
+      });
+
       return res.status(200).json({ comment });
     } catch (err) {
       next(err);
@@ -87,14 +101,24 @@ exports.update_one = [
 
 exports.delete_one = async function (req, res, next) {
   try {
-    const deletedComment = await Comment.findByIdAndDelete(
-      req.params.commentid
+    const comment = await Comment.findById(req.params.commentid).populate(
+      'user'
     );
-    if (!deletedComment) {
+
+    if (!comment) {
       return res
         .status(404)
         .json({ err: `Comment (id: ${req.params.commentid}) not found.` });
     }
+
+    if (comment.user !== req.user) {
+      return res
+        .status(403)
+        .json({ err: 'You do not have permission to delete this comment.' });
+    }
+
+    await Comment.findByIdAndDelete(req.params.commentId);
+
     return res.status(200).json({
       message: `Comment (id: ${req.params.commentid}) successfully deleted.`,
     });
