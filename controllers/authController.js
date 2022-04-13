@@ -4,6 +4,7 @@ const User = require('../models/user');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
+// Route protector #1
 exports.isAuth = function (req, res, next) {
   if (req.isAuthenticated()) {
     next();
@@ -12,6 +13,7 @@ exports.isAuth = function (req, res, next) {
   }
 };
 
+// Route protector #2
 exports.isAdmin = function (req, res, next) {
   if (req.isAuthenticated() && req.user.admin) {
     next();
