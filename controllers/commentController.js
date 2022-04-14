@@ -1,5 +1,6 @@
 const Comment = require('../models/comment');
 const { body, validationResult } = require('express-validator');
+const isEqual = require('lodash/isEqual');
 
 exports.get_all_relevant = async function (req, res, next) {
   try {
@@ -18,7 +19,6 @@ exports.get_all_relevant = async function (req, res, next) {
 
 exports.create_one = [
   body('body').not().isEmpty({ ignore_whitespace: true }).escape(),
-  body('username').isAlphanumeric(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -30,14 +30,13 @@ exports.create_one = [
       return;
     }
 
-    const { body, date_time } = req.body;
+    const { body } = req.body;
     const post = req.params.id;
     const user = req.user._id;
 
     const newComment = new Comment({
       body,
       user,
-      date_time,
       post,
     });
 
@@ -52,7 +51,6 @@ exports.create_one = [
 
 exports.update_one = [
   body('body').not().isEmpty({ ignore_whitespace: true }).escape(),
-  body('username').isAlphanumeric(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -64,14 +62,15 @@ exports.update_one = [
       return;
     }
 
-    const { body, date_time } = req.body;
+    const { body } = req.body;
     const post = req.params.id;
-    const user = req.user;
+    const sessionUser = JSON.stringify(req.user);
 
     try {
       const comment = await Comment.findById(req.params.commentid).populate(
         'user'
       ); // Must populate user field to compare against user object stored in request by passport
+      const commentAuthor = JSON.stringify(comment.user);
 
       if (!comment) {
         return res
@@ -79,16 +78,15 @@ exports.update_one = [
           .json({ err: `Comment (id: ${req.params.commentid}) not found.` });
       }
 
-      if (comment.user !== req.user) {
+      if (!isEqual(sessionUser, commentAuthor)) {
         return res
           .status(403)
           .json({ err: 'You do not have permission to edit this comment.' });
       }
 
-      await Comment.findByIdAndUpdate(req.params.commentId, {
+      await Comment.findByIdAndUpdate(req.params.commentid, {
         body,
         user,
-        date_time,
         post,
       });
 
@@ -100,10 +98,13 @@ exports.update_one = [
 ];
 
 exports.delete_one = async function (req, res, next) {
+  const sessionUser = JSON.stringify(req.user);
+
   try {
     const comment = await Comment.findById(req.params.commentid).populate(
       'user'
     );
+    const commentAuthor = JSON.stringify(comment.user);
 
     if (!comment) {
       return res
@@ -111,13 +112,13 @@ exports.delete_one = async function (req, res, next) {
         .json({ err: `Comment (id: ${req.params.commentid}) not found.` });
     }
 
-    if (comment.user !== req.user) {
+    if (!isEqual(sessionUser, commentAuthor)) {
       return res
         .status(403)
         .json({ err: 'You do not have permission to delete this comment.' });
     }
 
-    await Comment.findByIdAndDelete(req.params.commentId);
+    await Comment.findByIdAndDelete(req.params.commentid);
 
     return res.status(200).json({
       message: `Comment (id: ${req.params.commentid}) successfully deleted.`,
