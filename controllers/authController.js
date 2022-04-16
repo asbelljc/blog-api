@@ -76,6 +76,18 @@ exports.logout = function (req, res, next) {
   res.status(200).json({ msg: 'You have successfully logged out.' });
 };
 
+exports.session = function (req, res, next) {
+  let session;
+
+  if (req.isAuthenticated()) {
+    session = req.user.admin ? 'admin' : 'user';
+  } else {
+    session = null;
+  }
+
+  res.status(200).json({ session });
+};
+
 // BOTH TESTED SUCCESSFULLY; now will use isAuth and isAdmin middlewares elsewhere
 //
 // exports.get_protected = [
