@@ -67,7 +67,10 @@ exports.signup = [
 exports.login = [
   passport.authenticate('local'),
   function (req, res, next) {
-    res.status(200).json({ msg: 'You have successfully logged in.' });
+    const status = req.user.admin ? 'admin' : 'user';
+    const { username } = req.user;
+
+    res.status(200).json({ session: { status, username } });
   },
 ];
 
@@ -80,7 +83,10 @@ exports.session = function (req, res, next) {
   let session;
 
   if (req.isAuthenticated()) {
-    session = req.user.admin ? 'admin' : 'user';
+    const status = req.user.admin ? 'admin' : 'user';
+    const { username } = req.user;
+
+    session = { status, username };
   } else {
     session = null;
   }

@@ -2,6 +2,7 @@ require('dotenv').config();
 
 // Useful middlewares
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -38,6 +39,7 @@ const router = require('./routes');
 
 const app = express();
 
+app.use(cors({ origin: process.env.FRONTEND_ORIGIN }));
 app.use(session(sessionOptions));
 app.use(passport.initialize()); // initialize passport on every request
 app.use(passport.session());
