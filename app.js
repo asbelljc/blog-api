@@ -2,7 +2,7 @@ require('dotenv').config();
 
 // Useful middlewares
 const express = require('express');
-const cors = require('cors');
+// const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -27,9 +27,11 @@ const sessionStore = new MongoStore({
 const sessionOptions = {
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   store: sessionStore,
   cookie: {
+    sameSite: 'lax',
+    secure: false,
     maxAge: 1000 * 60 * 60 * 24 * 14, // 2-week sessions
   },
 };
@@ -39,7 +41,7 @@ const router = require('./routes');
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN }));
+// app.use(cors({ origin: process.env.FRONTEND_ORIGIN, credentials: true }));
 app.use(session(sessionOptions));
 app.use(passport.initialize()); // initialize passport on every request
 app.use(passport.session());
