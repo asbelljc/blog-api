@@ -6,19 +6,27 @@ const { body, validationResult } = require('express-validator');
 
 // Route protector #1
 exports.isAuth = function (req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.sendStatus(401);
+  try {
+    if (req.isAuthenticated()) {
+      next();
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (err) {
+    next(err);
   }
 };
 
 // Route protector #2
 exports.isAdmin = function (req, res, next) {
-  if (req.isAuthenticated() && req.user.admin) {
-    next();
-  } else {
-    res.sendStatus(401);
+  try {
+    if (req.isAuthenticated() && req.user.admin) {
+      next();
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -75,37 +83,29 @@ exports.login = [
 ];
 
 exports.logout = function (req, res, next) {
-  req.logout();
-  res.status(200).json({ msg: 'You have successfully logged out.' });
+  try {
+    req.logout();
+    res.status(200).json({ msg: 'You have successfully logged out.' });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.session = function (req, res, next) {
-  let session;
+  try {
+    let session;
 
-  if (req.isAuthenticated()) {
-    const status = req.user.admin ? 'admin' : 'user';
-    const { username } = req.user;
+    if (req.isAuthenticated()) {
+      const status = req.user.admin ? 'admin' : 'user';
+      const { username } = req.user;
 
-    session = { status, username };
-  } else {
-    session = null;
+      session = { status, username };
+    } else {
+      session = null;
+    }
+
+    res.status(200).json({ session });
+  } catch (err) {
+    next(err);
   }
-
-  res.status(200).json({ session });
 };
-
-// BOTH TESTED SUCCESSFULLY; now will use isAuth and isAdmin middlewares elsewhere
-//
-// exports.get_protected = [
-//   isAuth,
-//   function (req, res, next) {
-//     res.send('You made it to the protected route.');
-//   },
-// ];
-
-// exports.get_admin = [
-//   isAdmin,
-//   function (req, res, next) {
-//     res.send('You made it to the admin route.');
-//   },
-// ];
