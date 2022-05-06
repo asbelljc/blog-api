@@ -3,6 +3,51 @@ require('dotenv').config();
 const User = require('../models/user');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
+const { v4: uuid } = require('uuid');
+
+// add a non-httpOnly cookie to allow offline logout
+function initSecondaryAuthCookie(req, res, next) {
+  let token = uuid();
+
+  res.cookie('secondaryAuthToken', token, {
+    maxAge: 1000 * 60 * 60 * 24 * 14, // 2-week sessions
+    httpOnly: false,
+  });
+
+  req.session.secondaryAuthToken = token;
+
+  next();
+}
+
+// check that our second auth cookie is present/valid
+exports.checkForOfflineLogout = async function (req, res, next) {
+  if (req.isAuthenticated()) {
+    let cookieToken = req.cookies.secondaryAuthToken;
+    let sessionToken = req.session.secondaryAuthToken;
+
+    if (sessionToken !== undefined) {
+      if (cookieToken !== sessionToken) {
+        // this means the user logged out while offline; log them out
+        req.logout();
+        // destroy the session
+        await new Promise((resolve, reject) => {
+          req.session.destroy((err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
+    } else {
+      // No token stored in session; create and assign one
+      // This keeps existing sessions valid (backward compatibility)
+      initSecondaryAuthCookie(req, res, next);
+    }
+  }
+  next();
+};
 
 // Route protector #1
 exports.isAuth = function (req, res, next) {
@@ -74,6 +119,7 @@ exports.signup = [
 
 exports.login = [
   passport.authenticate('local'),
+  initSecondaryAuthCookie,
   function (req, res, next) {
     const status = req.user.admin ? 'admin' : 'user';
     const { username } = req.user;

@@ -11,6 +11,7 @@ const helmet = require('helmet');
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const { checkForOfflineLogout } = require('./controllers/authController');
 
 // Configure database and open connection
 require('./config/database');
@@ -52,6 +53,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Not 100% sure on this one...
 app.use(compression());
+app.use(checkForOfflineLogout);
 
 app.use(router);
 
