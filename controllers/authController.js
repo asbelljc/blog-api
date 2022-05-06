@@ -75,6 +75,8 @@ exports.signup = [
   body('username')
     .trim()
     .escape()
+    .notEmpty()
+    .withMessage('Username must not be blank.')
     .custom(async function (username) {
       try {
         const existingUsername = await User.findOne({ username });
@@ -88,12 +90,12 @@ exports.signup = [
 
   body('password')
     .isLength(8)
-    .withMessage('Password must be at least 8 characters long.'),
+    .withMessage('Password must be at least 8 characters.'),
 
   async function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
+      return res.status(400).json({
         username: req.body.username,
         errors: errors.array(),
       });
