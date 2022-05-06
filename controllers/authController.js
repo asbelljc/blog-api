@@ -125,8 +125,7 @@ exports.login = [
 ];
 
 // need this export syntax because logout is used by checkForOfflineLogout (within this file)
-exports.logout = logout;
-function logout(req, res, next) {
+exports.logout = function (req, res, next) {
   try {
     req.logout();
     // session should already be destroyed by checkForOfflineLogout, but if somehow it isn't - destroy it
@@ -135,7 +134,7 @@ function logout(req, res, next) {
   } catch (err) {
     next(err);
   }
-}
+};
 
 exports.session = function (req, res, next) {
   try {
