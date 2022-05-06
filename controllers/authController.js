@@ -28,17 +28,13 @@ exports.checkForOfflineLogout = async function (req, res, next) {
     if (sessionToken !== undefined) {
       if (cookieToken !== sessionToken) {
         // this means the user logged out while offline; log them out
-        req.logout();
-        // destroy the session
-        await new Promise((resolve, reject) => {
-          req.session.destroy((err) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          });
-        });
+        try {
+          req.logout();
+          req.session.destroy();
+          next();
+        } catch (err) {
+          next(err);
+        }
       }
     } else {
       // No token stored in session; create and assign one
@@ -128,14 +124,18 @@ exports.login = [
   },
 ];
 
-exports.logout = function (req, res, next) {
+// need this export syntax because logout is used by checkForOfflineLogout (within this file)
+exports.logout = logout;
+function logout(req, res, next) {
   try {
     req.logout();
+    // session should already be destroyed by checkForOfflineLogout, but if somehow it isn't - destroy it
+    req.session && req.session.destroy();
     res.status(200).json({ msg: 'You have successfully logged out.' });
   } catch (err) {
     next(err);
   }
-};
+}
 
 exports.session = function (req, res, next) {
   try {
