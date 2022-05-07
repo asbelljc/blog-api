@@ -108,7 +108,8 @@ exports.signup = [
         admin: req.body.admin && req.body.admin == process.env.ADMIN_PASSWORD,
       }).save();
 
-      res.status(201).json({ msg: 'You have successfully registered.' });
+      res.status(201); // set status to 201 to indicate successful user creation
+      next(); // then pass call to login (see routes/auth/index.js); no need to make user login just after signup
     } catch (err) {
       next(err);
     }
@@ -122,7 +123,7 @@ exports.login = [
     const status = req.user.admin ? 'admin' : 'user';
     const { username } = req.user;
 
-    res.status(200).json({ session: { status, username } });
+    res.json({ session: { status, username } });
   },
 ];
 
