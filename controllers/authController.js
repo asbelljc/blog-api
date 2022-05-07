@@ -72,11 +72,12 @@ exports.isAdmin = function (req, res, next) {
 };
 
 exports.signup = [
-  body('username')
+  body('username', 'Username must be 1-12 characters, no spaces.')
     .trim()
+    .isLength({ min: 1, max: 12 })
+    .contains(' ')
     .escape()
-    .notEmpty()
-    .withMessage('Username must not be blank.')
+    .bail() // no need to call database if above checks fail
     .custom(async function (username) {
       try {
         const existingUsername = await User.findOne({ username });
@@ -89,8 +90,10 @@ exports.signup = [
     }),
 
   body('password')
-    .isLength(8)
-    .withMessage('Password must be at least 8 characters.'),
+    .trim()
+    .isLength({ min: 8, max: 48 })
+    .withMessage('Password must be 8-48 characters.')
+    .escape(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
