@@ -75,6 +75,7 @@ exports.signup = [
   body('username', 'Username must be 1-12 characters, no spaces.')
     .trim()
     .isLength({ min: 1, max: 12 })
+    .not()
     .contains(' ')
     .escape()
     .bail() // no need to call database if above checks fail
