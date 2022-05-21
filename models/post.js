@@ -3,10 +3,14 @@ const { Schema } = mongoose;
 const { DateTime } = require('luxon');
 
 const PostSchema = new Schema({
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  date_time: { type: Date, default: Date.now() },
-  isPublished: { type: Boolean, default: false },
+  title: { type: String, unique: true, required: true },
+  slug: { type: String, unique: true, required: true },
+  markdown: { type: String, required: true },
+  // if now, published; if future, scheduled publish; if empty, unpublished
+  tags: { type: [String], required: false },
+  date_time: { type: Date, required: false },
+  seo_title_tag: { type: String, required: true },
+  seo_meta_description: { type: String, required: true },
 });
 
 PostSchema.virtual('date_time_formatted').get(function () {

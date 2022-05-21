@@ -28,8 +28,45 @@ exports.get_one = async function (req, res, next) {
 };
 
 exports.create_one = [
-  body('title').not().isEmpty().trim().escape(),
-  body('body').not().isEmpty().trim().escape(),
+  body('title')
+    .trim()
+    .not()
+    .isEmpty()
+    .escape()
+    .bail()
+    .custom(async function (title) {
+      try {
+        const existingTitle = await Post.findOne({ title });
+        if (existingTitle) {
+          throw new Error('Another blog post has this title.');
+        }
+      } catch (err) {
+        throw new Error(err);
+      }
+    }),
+
+  body('slug')
+    .trim()
+    .not()
+    .isEmpty()
+    .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .bail()
+    .custom(async function (slug) {
+      try {
+        const existingSlug = await Post.findOne({ slug });
+        if (existingSlug) {
+          throw new Error('Another blog post has this slug.');
+        }
+      } catch (err) {
+        throw new Error(err);
+      }
+    }),
+
+  body('markdown').trim().not().isEmpty(),
+
+  body('seo_title_tag').trim().not().isEmpty(),
+
+  body('seo_meta_description').trim().not().isEmpty(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -41,12 +78,21 @@ exports.create_one = [
       return;
     }
 
-    const { title, body, date_time, isPublished } = req.body;
+    const {
+      title,
+      slug,
+      markdown,
+      date_time,
+      seo_title_tag,
+      seo_meta_description,
+    } = req.body;
     const newPost = new Post({
       title,
-      body,
+      slug,
+      markdown,
       date_time,
-      isPublished,
+      seo_title_tag,
+      seo_meta_description,
     });
 
     try {
@@ -59,8 +105,19 @@ exports.create_one = [
 ];
 
 exports.update_one = [
-  body('title').not().isEmpty().trim().escape(),
-  body('body').not().isEmpty().trim().escape(),
+  body('title').trim().not().isEmpty().escape(),
+
+  body('slug')
+    .trim()
+    .not()
+    .isEmpty()
+    .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+
+  body('markdown').trim().not().isEmpty(),
+
+  body('seo_title_tag').trim().not().isEmpty(),
+
+  body('seo_meta_description').trim().not().isEmpty(),
 
   async function (req, res, next) {
     const errors = validationResult(req);
@@ -72,14 +129,23 @@ exports.update_one = [
       return;
     }
 
-    const { title, body, date_time, isPublished } = req.body;
+    const {
+      title,
+      slug,
+      markdown,
+      date_time,
+      seo_title_tag,
+      seo_meta_description,
+    } = req.body;
 
     try {
       const post = await Post.findByIdAndUpdate(req.params.id, {
         title,
-        body,
+        slug,
+        markdown,
         date_time,
-        isPublished,
+        seo_title_tag,
+        seo_meta_description,
       });
       if (!post) {
         return res
