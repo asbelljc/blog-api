@@ -9,7 +9,7 @@ const commentsRouter = require('./comments');
 // Posts routes
 router.get('/', post_controller.get_all);
 
-router.get('/:id', post_controller.get_one);
+router.get('/:slug', post_controller.get_one_by_slug);
 
 router.post('/', isAdmin, post_controller.create_one);
 

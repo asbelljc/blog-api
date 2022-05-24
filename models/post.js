@@ -13,12 +13,12 @@ const PostSchema = new Schema({
   seo_meta_description: { type: String, required: true },
 });
 
-PostSchema.virtual('date_time_formatted').get(function () {
-  const dtFormat = {
-    ...DateTime.DATE_MED_WITH_WEEKDAY,
-    ...DateTime.TIME_SIMPLE,
-  };
-  return this.date_time.toLocaleString(dtFormat);
-});
+// PostSchema.virtual('date_time_formatted').get(function () {
+//   const dtFormat = {
+//     ...DateTime.DATE_MED_WITH_WEEKDAY,
+//     ...DateTime.TIME_SIMPLE,
+//   };
+//   return DateTime.fromJSDate(this.date_time).toLocaleString(dtFormat);
+// });
 
 module.exports = mongoose.model('Post', PostSchema);

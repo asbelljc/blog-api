@@ -1,9 +1,12 @@
 const Post = require('../models/post');
 const { body, validationResult } = require('express-validator');
+const showdown = require('showdown');
 
 exports.get_all = async function (req, res, next) {
   try {
-    const posts = await Post.find({}).sort({ date_time: -1 });
+    const posts = await Post.find({}, 'title slug date_time tags').sort({
+      date_time: -1,
+    });
     if (!posts) {
       return res.status(404).json({ err: 'Posts not found.' });
     }
@@ -13,14 +16,19 @@ exports.get_all = async function (req, res, next) {
   }
 };
 
-exports.get_one = async function (req, res, next) {
+exports.get_one_by_slug = async function (req, res, next) {
   try {
-    const post = await Post.findById(req.params.id);
+    const { slug } = req.params;
+
+    const post = await Post.findOne({ slug });
+
     if (!post) {
-      return res
-        .status(404)
-        .json({ err: `Post (id: ${req.params.id}) not found.` });
+      return res.status(404).json({ err: `Post (slug: ${slug}) not found.` });
     }
+
+    const markdownConverter = new showdown.Converter();
+    post.markdown = markdownConverter.makeHtml(post.markdown);
+
     res.status(200).json({ post });
   } catch (err) {
     next(err);
@@ -82,6 +90,7 @@ exports.create_one = [
       title,
       slug,
       markdown,
+      tags,
       date_time,
       seo_title_tag,
       seo_meta_description,
@@ -90,6 +99,7 @@ exports.create_one = [
       title,
       slug,
       markdown,
+      tags,
       date_time,
       seo_title_tag,
       seo_meta_description,

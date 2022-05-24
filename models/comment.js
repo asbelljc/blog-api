@@ -14,7 +14,7 @@ CommentSchema.virtual('date_time_formatted').get(function () {
     ...DateTime.DATE_MED_WITH_WEEKDAY,
     ...DateTime.TIME_SIMPLE,
   };
-  return this.date_time.toLocaleString(dtFormat);
+  return DateTime.fromISO(this.date_time).toLocaleString(dtFormat);
 });
 
 module.exports = mongoose.model('Comment', CommentSchema);
