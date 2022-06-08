@@ -5,9 +5,11 @@ const isEqual = require('lodash/isEqual');
 exports.get_all_relevant = async function (req, res, next) {
   try {
     const postId = req.params.id;
-    const comments = await Comment.find({ post: postId }).sort({
-      date_time: -1,
-    });
+    const comments = await Comment.find({ post: postId })
+      .populate('user')
+      .sort({
+        date_time: -1,
+      });
     if (!comments) {
       return res.status(404).json({ err: 'Comments not found.' });
     }
@@ -23,7 +25,7 @@ exports.create_one = [
   async function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({
+      res.status(400).json({
         data: req.body,
         errors: errors.array(),
       });
@@ -55,7 +57,7 @@ exports.update_one = [
   async function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({
+      res.status(400).json({
         data: req.body,
         errors: errors.array(),
       });
@@ -86,8 +88,7 @@ exports.update_one = [
 
       await Comment.findByIdAndUpdate(req.params.commentid, {
         body,
-        user,
-        post,
+        date_time: Date.now(),
       });
 
       return res.status(200).json({ comment });
