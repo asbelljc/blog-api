@@ -65,7 +65,6 @@ exports.update_one = [
     }
 
     const { body } = req.body;
-    const post = req.params.id;
     const sessionUser = JSON.stringify(req.user);
 
     try {
@@ -88,7 +87,7 @@ exports.update_one = [
 
       await Comment.findByIdAndUpdate(req.params.commentid, {
         body,
-        date_time: Date.now(),
+        edited: true,
       });
 
       return res.status(200).json({ comment });
