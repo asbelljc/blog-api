@@ -44,6 +44,7 @@ exports.create_one = [
 
     try {
       await newComment.save();
+      await newComment.populate('user');
       return res.status(201).json({ newComment });
     } catch (err) {
       next(err);
