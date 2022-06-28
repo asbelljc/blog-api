@@ -10,7 +10,3 @@ mongoose.connect(dbUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-
-mongoose.connection.on('connected', () => {
-  console.log('Database connected');
-});
