@@ -3,6 +3,7 @@ require('dotenv').config();
 // Useful middlewares
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const compression = require('compression');
@@ -17,6 +18,27 @@ require('./config/database');
 
 // Configure passport
 require('./config/auth');
+
+// Configure CORS
+const safelist = [
+  'https://www.jonathanasbell.com',
+  'https://jonathanasbell.com',
+  'https://www.admin.jonathanasbell.com',
+  'https://admin.jonathanasbell.com',
+];
+
+const corsOptionsDelegate = (req, callback) => {
+  const corsOptions = { credentials: true, origin: true };
+
+  if (
+    safelist.indexOf(req.header('Origin')) !== -1 ||
+    req.url.startsWith('/assets/')
+  ) {
+    callback(null, corsOptions);
+  } else {
+    callback(new Error('bad origin'));
+  }
+};
 
 // Get router
 const router = require('./routes');
@@ -44,6 +66,7 @@ mongoose.connection.on('connected', () => {
     },
   };
 
+  app.use(cors(corsOptionsDelegate));
   app.use(session(sessionOptions));
   app.use(passport.initialize()); // initialize passport on every request
   app.use(passport.session());
