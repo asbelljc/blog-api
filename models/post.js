@@ -6,8 +6,8 @@ const PostSchema = new Schema({
   title: { type: String, unique: true, required: true },
   slug: { type: String, unique: true, required: true },
   markdown: { type: String, required: true },
-  // if now, published; if future, scheduled publish; if empty, unpublished
   tags: { type: [String], required: false },
+  // if now, published; if future, scheduled publish; if empty, unpublished
   date_time: { type: Date, required: false },
   seo_title_tag: { type: String, required: true },
   seo_meta_description: { type: String, required: true },
